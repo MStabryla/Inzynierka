@@ -1,0 +1,36 @@
+ustawienia
+
+PINY    STEROWNIK
+
+11      BIN1
+10      BIN2
+9       AIN2
+6       AIN1
+
+1 konfiguracja
+
+PINY    STAN
+11      LOW
+10      HIGH
+9       HIGH
+6       LOW
+
+JAZDA DO TYŁU
+
+2 konfiguracja
+
+PINY    STAN
+11      HIGH
+10      LOW
+9       LOW
+6       HIGH
+
+JAZDA W PRZECIWNYCH KIERUNKACH
+
+3 konfiguracja
+
+PINY    STAN
+11      HIGH
+10      LOW
+9       HIGH
+6       LOW
