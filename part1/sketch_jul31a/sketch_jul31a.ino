@@ -10,8 +10,8 @@ void setup() {
   
   digitalWrite(11,LOW);
   digitalWrite(10,HIGH);
-  digitalWrite(9,HIGH);
-  digitalWrite(6,LOW);
+  digitalWrite(9,LOW);
+  digitalWrite(6,HIGH);
 }
 
 String mess;

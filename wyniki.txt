@@ -15,7 +15,7 @@ PINY    STAN
 9       HIGH
 6       LOW
 
-JAZDA DO TYŁU
+JAZDA W PRZECIWNYCH KIERUNKACH
 
 2 konfiguracja
 
@@ -34,3 +34,15 @@ PINY    STAN
 10      LOW
 9       HIGH
 6       LOW
+
+JAZDA DO TYŁU
+
+4 konfiguracja
+
+PINY    STAN
+11      LOW
+10      HIGH
+9       LOW
+6       HIGH
+
+JAZDA DO PRZODU
