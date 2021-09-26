@@ -53,41 +53,63 @@ void loop() {
 
   bool pinStatus[4] = { true, false, true, false };
 
-  digitalWrite(11,pinStatus[0]);
+  analogWrite(11,pinStatus[0] ? 1 : 0);
   digitalWrite(10,pinStatus[1]);
-  digitalWrite(9,pinStatus[2]);
+  analogWrite(9,pinStatus[2]? 1 : 0);
   digitalWrite(6,pinStatus[3]);
 
   delay(3000);
 
-  bool pinStatus2[4] = { true, true, true, true };
+  bool pinStatus2[4] = { true, false, true, false };
+  change(pinStatus,pinStatus2,4);
+
+  analogWrite(11,pinStatus[0] ? 0.5 : 0);
+  digitalWrite(10,pinStatus[1]);
+  analogWrite(9,pinStatus[2]? 0.5 : 0);
+  digitalWrite(6,pinStatus[3]);
+
+  delay(3000);
+
+  /*bool pinStatus2[4] = { true, true, true, true };
   change(pinStatus,pinStatus2,4);
 
   digitalWrite(11,pinStatus[0]);
-  digitalWrite(10,pinStatus[1]);
+  analogWrite(10,pinStatus[1] ? 0.5 : 0);
   digitalWrite(9,pinStatus[2]);
-  digitalWrite(6,pinStatus[3]);
+  analogWrite(6,pinStatus[3] ? 0.5 : 0);
 
-  delay(3000);
+  delay(3000);*/
 
+  //backward
+  
   bool pinStatus3[4] = { false, true, false, true };
   change(pinStatus,pinStatus3,4);
 
   digitalWrite(11,pinStatus[0]);
-  digitalWrite(10,pinStatus[1]);
+  analogWrite(10,pinStatus[1] ? 1 : 0);
   digitalWrite(9,pinStatus[2]);
-  digitalWrite(6,pinStatus[3]);
+  analogWrite(6,pinStatus[3] ? 1 : 0);
 
   delay(3000);
 
-  bool pinStatus4[4] = { true, true, true, true };
+  bool pinStatus4[4] = { false, true, false, true };
   change(pinStatus,pinStatus4,4);
 
   digitalWrite(11,pinStatus[0]);
-  digitalWrite(10,pinStatus[1]);
+  analogWrite(10,pinStatus[1] ? 0.5 : 0);
   digitalWrite(9,pinStatus[2]);
-  digitalWrite(6,pinStatus[3]);
+  analogWrite(6,pinStatus[3] ? 0.5 : 0);
 
   delay(3000);
+
+  /*bool pinStatus4[4] = { true, true, true, true };
+  change(pinStatus,pinStatus4,4);
+
+  analogWrite(11,pinStatus[0] ? 0.5 : 0);
+  digitalWrite(10,pinStatus[1]);
+  analogWrite(9,pinStatus[2]? 0.5 : 0);
+  digitalWrite(6,pinStatus[3]);
+
+  delay(3000);*/
 
 }
