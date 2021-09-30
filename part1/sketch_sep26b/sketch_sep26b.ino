@@ -1,3 +1,6 @@
+#include "Arduino.h"
+#include <analogWrite.h>
+
 void change(bool *array, bool *array2, int length)
 {
     if (array == NULL || array2 == NULL)
@@ -6,20 +9,25 @@ void change(bool *array, bool *array2, int length)
         array[i] = array2[i];
 }
 
+const int IA1 = 5;
+const int IA2 = 4;
+const int IB1 = 2;
+const int IB2 = 15;
+
 void setup() {
   // put your setup code here, to run once:
 
   Serial.begin(9600);
   
-  pinMode(11,OUTPUT);
-  pinMode(10,OUTPUT);
-  pinMode(9,OUTPUT);
-  pinMode(6,OUTPUT);
+  pinMode(IA1,OUTPUT);
+  pinMode(IA2,OUTPUT);
+  pinMode(IB1,OUTPUT);
+  pinMode(IB2,OUTPUT);
   
-  digitalWrite(11,LOW);
-  digitalWrite(10,LOW);
-  digitalWrite(9,LOW);
-  digitalWrite(6,LOW);
+  digitalWrite(IA1,LOW);
+  digitalWrite(IA2,LOW);
+  digitalWrite(IB1,LOW);
+  digitalWrite(IB2,LOW);
 }
 
 String mess;
@@ -53,20 +61,20 @@ void loop() {
 
   bool pinStatus[4] = { true, false, true, false };
 
-  analogWrite(11,pinStatus[0] ? 1 : 0);
-  digitalWrite(10,pinStatus[1]);
-  analogWrite(9,pinStatus[2]? 1 : 0);
-  digitalWrite(6,pinStatus[3]);
+  analogWrite(IA1,pinStatus[0] ? 2*255 : 0);
+  digitalWrite(IA2,pinStatus[1]);
+  analogWrite(IB1,pinStatus[2]? 2*255 : 0);
+  digitalWrite(IB2,pinStatus[3]);
 
   delay(3000);
 
   bool pinStatus2[4] = { true, false, true, false };
   change(pinStatus,pinStatus2,4);
 
-  analogWrite(11,pinStatus[0] ? 0.5 : 0);
-  digitalWrite(10,pinStatus[1]);
-  analogWrite(9,pinStatus[2]? 0.5 : 0);
-  digitalWrite(6,pinStatus[3]);
+  analogWrite(IA1,pinStatus[0] ? 128 : 0);
+  digitalWrite(IA2,pinStatus[1]);
+  analogWrite(IB1,pinStatus[2]? 128 : 0);
+  digitalWrite(IB2,pinStatus[3]);
 
   delay(3000);
 
@@ -85,20 +93,20 @@ void loop() {
   bool pinStatus3[4] = { false, true, false, true };
   change(pinStatus,pinStatus3,4);
 
-  digitalWrite(11,pinStatus[0]);
-  analogWrite(10,pinStatus[1] ? 1 : 0);
-  digitalWrite(9,pinStatus[2]);
-  analogWrite(6,pinStatus[3] ? 1 : 0);
+  digitalWrite(IA1,pinStatus[0]);
+  analogWrite(IA2,pinStatus[1] ? 2*255 : 0);
+  digitalWrite(IB1,pinStatus[2]);
+  analogWrite(IB2,pinStatus[3] ? 2*255 : 0);
 
   delay(3000);
 
   bool pinStatus4[4] = { false, true, false, true };
   change(pinStatus,pinStatus4,4);
 
-  digitalWrite(11,pinStatus[0]);
-  analogWrite(10,pinStatus[1] ? 0.5 : 0);
-  digitalWrite(9,pinStatus[2]);
-  analogWrite(6,pinStatus[3] ? 0.5 : 0);
+  digitalWrite(IA1,pinStatus[0]);
+  analogWrite(IA2,pinStatus[1] ? 128 : 0);
+  digitalWrite(IB1,pinStatus[2]);
+  analogWrite(IB2,pinStatus[3] ? 128 : 0);
 
   delay(3000);
 
