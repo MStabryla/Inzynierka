@@ -12,7 +12,7 @@ const int IB2 = 15;
 void setup() {
   // put your setup code here, to run once:
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(10000);
   WiFi.begin(ssid, password);
 
