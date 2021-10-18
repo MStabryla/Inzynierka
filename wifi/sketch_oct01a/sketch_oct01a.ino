@@ -28,10 +28,10 @@ void setup() {
   pinMode(IB1,OUTPUT);
   pinMode(IB2,OUTPUT);
   
-  digitalWrite(IA1,LOW);
-  digitalWrite(IA2,LOW);
-  digitalWrite(IB1,LOW);
-  digitalWrite(IB2,LOW);
+  digitalWrite(IA1,HIGH);
+  digitalWrite(IA2,HIGH);
+  digitalWrite(IB1,HIGH);
+  digitalWrite(IB2,HIGH);
 }
 
 String mess;

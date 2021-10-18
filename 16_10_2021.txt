@@ -1,0 +1,10 @@
+Kupić inną płytkę prototypową i dołączyć do robota
+DHT 11 - 22 - kupić czunik temperatury
+
+Czujnik odległości - który mam jest niedokładny, ew. laserowy
+
+1 etap - obrót o 360 stopni i pomiar odległości
+2 etap - obrót o 360 stopni i pomiar reszty czujników
+3 etap - robienie mapy odległości
+
+Etap na za tydzień - czujnik odległości i temperatury

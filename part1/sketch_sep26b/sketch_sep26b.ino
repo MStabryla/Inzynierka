@@ -17,17 +17,17 @@ const int IB2 = 15;
 void setup() {
   // put your setup code here, to run once:
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   
   pinMode(IA1,OUTPUT);
   pinMode(IA2,OUTPUT);
   pinMode(IB1,OUTPUT);
   pinMode(IB2,OUTPUT);
   
-  digitalWrite(IA1,LOW);
-  digitalWrite(IA2,LOW);
-  digitalWrite(IB1,LOW);
-  digitalWrite(IB2,LOW);
+  digitalWrite(IA1,HIGH);
+  digitalWrite(IA2,HIGH);
+  digitalWrite(IB1,HIGH);
+  digitalWrite(IB2,HIGH);
 }
 
 String mess;
@@ -61,21 +61,24 @@ void loop() {
 
   bool pinStatus[4] = { true, false, true, false };
 
-  analogWrite(IA1,pinStatus[0] ? 2*255 : 0);
+  analogWrite(IA1,pinStatus[0] ? 1024 : 0);
   digitalWrite(IA2,pinStatus[1]);
-  analogWrite(IB1,pinStatus[2]? 2*255 : 0);
+  analogWrite(IB1,pinStatus[2]? 1024 : 0);
   digitalWrite(IB2,pinStatus[3]);
 
+  Serial.println("Zmiana 1");
   delay(3000);
 
   bool pinStatus2[4] = { true, false, true, false };
   change(pinStatus,pinStatus2,4);
 
-  analogWrite(IA1,pinStatus[0] ? 128 : 0);
+  analogWrite(IA1,pinStatus[0] ? 1024 : 0);
   digitalWrite(IA2,pinStatus[1]);
-  analogWrite(IB1,pinStatus[2]? 128 : 0);
+  analogWrite(IB1,pinStatus[2]? 1024 : 0);
   digitalWrite(IB2,pinStatus[3]);
 
+  Serial.println("Zmiana 2");
+  
   delay(3000);
 
   /*bool pinStatus2[4] = { true, true, true, true };
@@ -94,20 +97,22 @@ void loop() {
   change(pinStatus,pinStatus3,4);
 
   digitalWrite(IA1,pinStatus[0]);
-  analogWrite(IA2,pinStatus[1] ? 2*255 : 0);
+  analogWrite(IA2,pinStatus[1] ? 1024 : 0);
   digitalWrite(IB1,pinStatus[2]);
-  analogWrite(IB2,pinStatus[3] ? 2*255 : 0);
+  analogWrite(IB2,pinStatus[3] ? 1024 : 0);
 
+  Serial.println("Zmiana 3");
   delay(3000);
 
   bool pinStatus4[4] = { false, true, false, true };
   change(pinStatus,pinStatus4,4);
 
   digitalWrite(IA1,pinStatus[0]);
-  analogWrite(IA2,pinStatus[1] ? 128 : 0);
+  analogWrite(IA2,pinStatus[1] ? 1024 : 0);
   digitalWrite(IB1,pinStatus[2]);
-  analogWrite(IB2,pinStatus[3] ? 128 : 0);
+  analogWrite(IB2,pinStatus[3] ? 1024 : 0);
 
+  Serial.println("Zmiana 4");
   delay(3000);
 
   /*bool pinStatus4[4] = { true, true, true, true };
