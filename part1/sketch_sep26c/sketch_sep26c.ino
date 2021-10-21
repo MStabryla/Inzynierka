@@ -1,4 +1,10 @@
 #include "Arduino.h"
+#include <analogWrite.h>
+
+const int IA1 = 5;
+const int IA2 = 4;
+const int IB1 = 2;
+const int IB2 = 15;
 
 void change(bool *array, bool *array2, int length)
 {
@@ -6,12 +12,14 @@ void change(bool *array, bool *array2, int length)
         return;
     for (int i = 0 ; i < length ; i++)
         array[i] = array2[i];
+
+    //digitalWrite(IA1,array2[0]);
+    //digitalWrite(IA2,array2[1]);
+    //digitalWrite(IB1,array2[2]);
+    //digitalWrite(IB2,array2[3]);
 }
 
-const int IA1 = 5;
-const int IA2 = 4;
-const int IB1 = 2;
-const int IB2 = 15;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,29 +37,6 @@ void setup() {
   digitalWrite(IB2,HIGH);
 }
 
-String mess;
-
-void setForward(int seconds,int speed,bool* pinStatus){
-  int i=0,toSecond = 0;
-  while(i < seconds*1000){
-    while(toSecond < 1000){
-      digitalWrite(IA2,pinStatus[1]);
-      digitalWrite(IB2,pinStatus[3]);
-      int tempSpeed = 0;
-      while(tempSpeed < speed){
-        digitalWrite(IA2,HIGH);
-        digitalWrite(IB2,HIGH);
-        tempSpeed++;
-      }
-      digitalWrite(IA2,LOW);
-      digitalWrite(IB2,LOW);
-      delay(1);
-      toSecond++;
-      i++;
-    }
-    toSecond = 0;
-  }
-}
 
 void loop() {
   /*if(Serial.available() > 0) {
@@ -81,30 +66,26 @@ void loop() {
   delay(1000);
 
   bool pinStatus[4] = { true, false, true, false };
+  //change(pinStatus,pinStatus,4);
+  digitalWrite(IA1,pinStatus[0]);
+  digitalWrite(IA2,pinStatus[1]);
+  digitalWrite(IB1,pinStatus[2]);
+  digitalWrite(IB2,pinStatus[3]);
 
-  //analogWrite(IA1,pinStatus[0] ? 1 : 0 );
-  //digitalWrite(IA2,pinStatus[1]);
-  //analogWrite(IB1,pinStatus[2]? 1 : 0);
-  //digitalWrite(IB2,pinStatus[3]);
-
-  //analogWrite(IA1,-1);
-  //analogWrite(IB1,-1);
-  setForward(3,500,pinStatus);
-  
-  Serial.println("Zmiana 1");
-  //delay(3000);
+  Serial.println("Zmiana");
+  delay(3000);
 
   bool pinStatus2[4] = { true, false, true, false };
   change(pinStatus,pinStatus2,4);
 
-  //analogWrite(IA1,pinStatus[0] ? 2 : 0);
-  //digitalWrite(IA2,pinStatus[1]);
-  //analogWrite(IB1,pinStatus[2]? 2 : 0);
-  //digitalWrite(IB2,pinStatus[3]);
-  setForward(3,64,pinStatus);
+  analogWrite(IA1,pinStatus[0] ? 0.5 : 0);
+  digitalWrite(IA2,pinStatus[1]);
+  analogWrite(IB1,pinStatus[2]? 0.5 : 0);
+  digitalWrite(IB2,pinStatus[3]);
+
   Serial.println("Zmiana 2");
   
-  //delay(3000);
+  delay(3000);
 
   /*bool pinStatus2[4] = { true, true, true, true };
   change(pinStatus,pinStatus2,4);
@@ -114,17 +95,17 @@ void loop() {
   digitalWrite(9,pinStatus[2]);
   analogWrite(6,pinStatus[3] ? 0.5 : 0);
 
-  delay(3000);*/
+  delay(3000);
 
   //backward
   
-  /*bool pinStatus3[4] = { false, true, false, true };
+  bool pinStatus3[4] = { false, true, false, true };
   change(pinStatus,pinStatus3,4);
 
-  digitalWrite(IA1,pinStatus[0]);
-  analogWrite(IA2,pinStatus[1] ? 128 : 0);
-  digitalWrite(IB1,pinStatus[2]);
-  analogWrite(IB2,pinStatus[3] ? 128 : 0);
+  //digitalWrite(IA1,pinStatus[0]);
+  //analogWrite(IA2,pinStatus[1] ? 1024 : 0);
+  //digitalWrite(IB1,pinStatus[2]);
+  //analogWrite(IB2,pinStatus[3] ? 1024 : 0);
 
   Serial.println("Zmiana 3");
   delay(3000);
@@ -132,10 +113,10 @@ void loop() {
   bool pinStatus4[4] = { false, true, false, true };
   change(pinStatus,pinStatus4,4);
 
-  digitalWrite(IA1,pinStatus[0]);
-  analogWrite(IA2,pinStatus[1] ? 64 : 0);
-  digitalWrite(IB1,pinStatus[2]);
-  analogWrite(IB2,pinStatus[3] ? 64 : 0);
+  //digitalWrite(IA1,pinStatus[0]);
+  //analogWrite(IA2,pinStatus[1] ? 1024 : 0);
+  //digitalWrite(IB1,pinStatus[2]);
+  //analogWrite(IB2,pinStatus[3] ? 1024 : 0);
 
   Serial.println("Zmiana 4");
   delay(3000);
