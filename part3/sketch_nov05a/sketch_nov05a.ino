@@ -128,10 +128,10 @@ void loop() {
   //delay(3000);
   //Stop();
   //delay(2000);
-  TurnRightAdv(128);
-  delay(3000);
-  Stop();
-  delay(2000);
+  //TurnRightAdv(255);
+  //delay(3000);
+  //Stop();
+  //delay(2000);
   //Forward(128);
   //delay(3000);
   //Stop();
@@ -140,4 +140,5 @@ void loop() {
   //delay(3000);
   //Stop();
   //delay(2000);
+  
 }
