@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include "HTTPClient.h"
  
-char* ssid = "Atlantis";
-char* password = "zaq1@WSX";
+char* ssid = "MAXX_LAN"; //"Atlantis";
+char* password = "debina23"; //"zaq1@WSX";
 
 const int IA1 = 5;
 const int IA2 = 4;
@@ -13,7 +13,7 @@ void setup() {
   // put your setup code here, to run once:
 
   Serial.begin(115200);
-  delay(10000);
+  delay(1000);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {

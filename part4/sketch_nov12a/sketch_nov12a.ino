@@ -40,14 +40,13 @@ LPS ps;
 #define         RatioMQ9CleanAir        (9.6) //RS / R0 = 60 ppm 
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
-char* ssid = "Atlantis";
-char* password = "zaq1@WSX";
+char* ssid = "MAXX_LAN"; //"Atlantis";
+char* password = "debina23"; //"zaq1@WSX";
 
 void setup() {
   // put your setup code here, to run once:
 
   Serial.begin(115200);
-  Serial.println("help");
   Wire.begin(SDA0_Pin, SCL0_Pin);
 
   //HCSR04.begin(distanceTrig, distanceEcho);
@@ -61,10 +60,6 @@ void setup() {
   {
     Serial.println("Failed to autodetect pressure sensor!");
   }
-  else
-  {
-    Serial.println("test");
-  }
   
   dht.begin();
 
@@ -76,10 +71,14 @@ void setup() {
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to Atlantis");
   }
-
   
-  
+  Serial.println("Connected to the Atlantis");
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
 }
 
 char mess[64];
@@ -214,16 +213,19 @@ void Stop(){
 }
 
 
-char wifiUrl[] = "http://192.168.0.99?message=";
-void WiFiGet(char* mess){
+char wifiUrl[256];
+void WiFiGet(char mess[]){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
     //http.begin("http://51.158.163.165/api/devices");
+    strcpy(wifiUrl,"http://192.168.0.99:3000/?message=");
     strcat(wifiUrl,mess);
+    delay(10);
+    Serial.println(wifiUrl);
     http.begin(wifiUrl);
     int httpCode = http.GET();
-    http.end(); 
+    http.end();
   }
 }
 
@@ -236,19 +238,23 @@ void loop() {
   float left = getDistance(distanceEcho1,distanceTrig1);
   float front = getDistance(distanceEcho2,distanceTrig2);
   
-  Serial.print("left ");
-  Serial.println(left);
-  Serial.print("front ");
-  Serial.println(front);
+  //Serial.print("left ");
+  //Serial.println(left);
+  //Serial.print("front ");
+  //Serial.println(front);
 
-  Serial.println(getTempMess());
+  //Serial.println(getTempMess());
 
-  Serial.println(getPressureMess());
+  //Serial.println(getPressureMess());
 
-  getGasSensorData();
+  //getGasSensorData();
 
+  char distanceMess[] = "";
+  sprintf(distanceMess, "left:%f,front:%f", left, front);
+  WiFiGet(distanceMess);
+  //WiFiGet(getTempMess());
+  //WiFiGet(getPressureMess());
 
-   ForwardWithTurning(1024,turningParameter);
   //Forward(512);
   //delay(3000);
   //Stop();
@@ -283,7 +289,10 @@ void loop() {
         turningParameter = 0.5 * (5.0 - diff)/5.0;
       }
   }
-  
+  char turningParameterMess[] = "";
+  //sprintf(turningParameterMess, "turningParameter: %f", turningParameter);
+  //WiFiGet(turningParameterMess);
+  ForwardWithTurning(1024,turningParameter);
   
   //delay(1000);
 }
