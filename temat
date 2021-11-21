@@ -1,0 +1,51 @@
+W sierpniu wspominałeś, że jedna ze studentek, która też pisze pracę pod twoją opieką, realizuje projekt serwera web napisanego w jeżyku C#.
+Wtedy też zasugerowałeś, żęby w jakiś sposób to połączyć. Ja byłem bardzo zainteresowany taką realizacją tematu
+Aczkolwiek od sierpnia jedynie otrzymałem link do strony tej aplikacji i wykonywałem do niej proste zapytania.
+Mówię ci o tym teraz nie dlatego, żeby teraz próbować skopiować zastosowanie od tej studentki, czy coś w tym stylu, tylko żeby nakreślić Ci kierunek i pomysł, jaki mniej więcej przyświecał mi od samego początku.
+Do rzeczy
+
+Podejście do tematu
+Chcę, żeby temat pt. Modyfikacja i implementacja zdalnie sterowanego robota przeznaczonego do wykonywania podstawowych pomiarów atmosferycznych został zrealizowany w następujący sposób:
+Zamysł całego projektu opiera się na sieci robocików (który prototyp aktualnie kończę), któe będą wykonywały jak największą możliwą ilość pomiarów, jakie bedą w stanie zrobić i przesłąć do serwera. 
+Ta sieć robocików byłaby zarządzana przez centralny serwer, który wysyłałby im polecenia prymitywne (typu np. rusz kilka metrów do przodu), albo bardziej zaawansowane typu podążaj wzdłuż ściany lub linii i stale przesyłaj dane.
+W ramach projektu inżynierskiego zrealizowałbym jedną z części tego projektu, czyli prototyp robocika, który:
+- robiłby pomiary wielu parametrów otoczenia (zgodnie z tematem pracy, przede wszystkim pomiary atmosferyczne)
+- poruszałby się za pomocą małego silnika DC
+- przyjmowałby komendy i wysyłałby dane przez sieć WiFi
+- zachowywał się półautonomicznie, jeżeli tak zarządzi serwer (wall following, line following lub coś innego)
+- możliwe, że robiłby płaską mapę za pomocą czujników odległości.
+
+W tym miejscu chciałbym się dopytać o projekt tego serwera, który robiła twoja studentka. Czy jest on gotowy na przyjmowanie danych i wysyłanie komend lub czegoś podobnego?
+
+Podejście do zastosowania
+Ze względu na to, że jest to aktualnie pięta achillesowa mojego tematu to postanowiłem podejś do teog zagadnienia nieco inaczej niż sugerujesz.
+Z tego co wywnioskowałem z rozmowy z Tobą oraz kilkoma innymi wykładowcami, klasycznym podejściem do pracy inżynierskiej jest znalezienie problemu, który występuje w rzeczywistości a nastepnie przedstawić rozwiązanie tego problemu.
+Jednakże tydzień temu robiąć research dotyczący poszukiwania zastosowania tematu spotkałem się z nieco innym podejściem np. tutaj: 
+https://mil.ufl.edu/5666/papers/IMDL_Report_Fall_12/Final%20Reports/Xiaodong_Fang/Xiaodong_Fang.pdf
+https://projugaadu.com/wall-follower-robot/
+Głównym fundamentem tej pracy jest przedstawienie technologii/produktu wraz detalami. Z kolei zastosowanie i problemy jakie mogą być rozwiązane są opisane w ostatnim rozdziale.
+W skrócie chciałbym aby moja praca miaął podobny szkielet - głównie chciałbym się skupić na opisaniu projektu inżynierskiego, zaś pod koniec przedstawić listę potencjalnych zastosowań teog projektu.
+
+Zastosowania
+Ten projekt aktualnie przegrywa w prawie wszystkich zastosowaniach z innymi rozwiązaniami, dlatego nie mogę się skupić na przedstawieniu tego robocika jako rozwiązanie jednego problemu a jako produktu, który przyda się do wielu sytuacyjnych zastosowań.
+System robotów w zastosowaniu komercyjnym przydzałby się 
+- dla klientów, którzy potrzebują szybko narzędzi pomiarowych w wielu miejscach np. w pomieszczeniach, w których aktualny najemca/właściciel nie chce inwestować
+przykład: sta
+- dla klientów szukających mobilnych narzędzi do uniwersalnych zastosowań - pomiarów bardzo wielu parametrów niewielkim kosztem
+- dla klientów poszukujących skanerów w niebezpiecznych miejscach - np. skażonych chemicznie, pomieszczeniach zamkniętych
+Zestaw w komercyjnym użytku wyglądałby nastepująco: 
+- komputer z serwerem od obsługi robocików 
+- dalekosiężny nadajniki WiFi https://tienda.siliceo.es/en/wifi-panel-antenna/435-melon-n519d-wifi-adapter-usb-ac-panel-antenna.html 
+- zestaw 10 mobilnych robocików.
+W skrócie jak najszersze zastosowania, gdzie liczy się dostępność, mobilność i uniwersalność pomiarów. 
+W planie rozwoju ująłbym też pomysł, żeby tak zmodyfikować prototyp, aby miał łatwo wymienialne czujniki i można było np. stworzyć robocik z czujnikami gazu i niebezpiecznych substancji, a potem zrobić z niego klasyczny robocik do pomiarów pogodowych. Wtedy będzie można się obronić w taki sposób, że to klienci by się zgłaszali po robocika, który pomógłby im w rozwiązaniu problemów. 
+Nie wiem czy zdecowanie znalezienia zastosowania na inne osoby przejdzie na obronie, ale po na tym etapie nie widzę alternatywy.
+
+Plan na kolejne dni
+Bedę chciał zaimplementować prostą pół automatyzację 
+- przesył komend z serwera na robocik
+- sterowanie robocikiem za pomocą komend prymitywnych typu rusz ileśtam metrów do przodu etc.
+
+Czy widzisz w tym pomyśle cień potencjału, że ten projekt jako tako się uratuje przed skresleniem na obronie.
+Jeżeli tak, to będę go kontynuwał według zamysłu jaki ci opisałem wyżej.
+Jeżeli nie, to w takim razie będę chciał zmienić temat na "Budowa i implementacja małowymiarowego robota typu wall follower" 
