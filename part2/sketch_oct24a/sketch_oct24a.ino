@@ -10,9 +10,9 @@ const int IA2 = 4;
 const int IB1 = 2;
 const int IB2 = 15;
 
-const int distanceEcho = 19;
-const int distanceTrig = 22;
-const int tempInput = 23;
+const int distanceEcho = 18;
+const int distanceTrig = 19;
+const int tempInput = 21;
 
 DHT dht(tempInput, DHTTYPE);
 
