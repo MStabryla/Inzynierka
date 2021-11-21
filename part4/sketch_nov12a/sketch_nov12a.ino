@@ -6,6 +6,8 @@
 #include <Wire.h>
 #include <LPS.h>
 #include <MQUnifiedsensor.h>
+#include <WiFi.h>
+#include "HTTPClient.h"
 
 #define DHTTYPE DHT11
 
@@ -38,6 +40,9 @@ LPS ps;
 #define         RatioMQ9CleanAir        (9.6) //RS / R0 = 60 ppm 
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
+char* ssid = "Atlantis";
+char* password = "zaq1@WSX";
+
 void setup() {
   // put your setup code here, to run once:
 
@@ -68,13 +73,10 @@ void setup() {
   MQ9.setA(1000.5); MQ9.setB(-2.186); // Configurate the ecuation values to get LPG concentration
   MQ9.init(); 
   
-  //if (!ps.init())
-  //{
-    //Serial.println("Failed to autodetect pressure sensor!");
-    //while (1);
-  //}
+  WiFi.begin(ssid, password);
 
-  //ps.enableDefault();
+  while (WiFi.status() != WL_CONNECTED) {
+  }
 
   
   
@@ -209,6 +211,20 @@ void Stop(){
   analogWrite(IA2,0, 100, 10, 0);
   analogWrite(IB1,0, 100, 10, 0);
   analogWrite(IB2,0, 100, 10, 0);
+}
+
+
+char wifiUrl[] = "http://192.168.0.99?message=";
+void WiFiGet(char* mess){
+  if ((WiFi.status() == WL_CONNECTED))
+  {
+    HTTPClient http;
+    //http.begin("http://51.158.163.165/api/devices");
+    strcat(wifiUrl,mess);
+    http.begin(wifiUrl);
+    int httpCode = http.GET();
+    http.end(); 
+  }
 }
 
 float turningParameter = 0.0;
