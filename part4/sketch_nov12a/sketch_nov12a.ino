@@ -21,6 +21,8 @@ const int distanceEcho1 = 19;
 const int distanceTrig1 = 21;
 const int distanceEcho2 = 25;
 const int distanceTrig2 = 26;
+const int distanceEcho3 = 32;
+const int distanceTrig3 = 33;
 const int tempInput = 18;
 const int gasSensor = 4;
 const int SDA0_Pin = 22;
@@ -46,14 +48,21 @@ char* password = "debina23"; //"zaq1@WSX";
 void setup() {
   // put your setup code here, to run once:
 
+  analogWrite(IA1,0, 100, 10, 0);
+  analogWrite(IA2,0, 100, 10, 0);
+  analogWrite(IB1,0, 100, 10, 0);
+  analogWrite(IB2,0, 100, 10, 0);
+  
   Serial.begin(115200);
   Wire.begin(SDA0_Pin, SCL0_Pin);
-
+  
   //HCSR04.begin(distanceTrig, distanceEcho);
   pinMode(distanceTrig1,OUTPUT);
   pinMode(distanceEcho1,INPUT);
   pinMode(distanceTrig2,OUTPUT);
   pinMode(distanceEcho2,INPUT);
+  pinMode(distanceTrig3,OUTPUT);
+  pinMode(distanceEcho3,INPUT);
   pinMode(4,INPUT);
 
   if(!ps.init())
@@ -79,6 +88,8 @@ void setup() {
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
+
+  digitalWrite(IA1,LOW);
 }
 
 char mess[64];
@@ -135,7 +146,7 @@ char* getPressureMess(){
   float altitude = ps.pressureToAltitudeMeters(pressure);
   float temperature = ps.readTemperatureC();
 
-  sprintf(pressureMess, "p: %f , inhPa\ta: %f m\t %f C", pressure, altitude, temperature);
+  sprintf(pressureMess, "p:%f,inhPa\ta:%fm\t%fC", pressure, altitude, temperature);
 
   return pressureMess;
 }
@@ -213,15 +224,29 @@ void Stop(){
 }
 
 
-char wifiUrl[256];
+
 void WiFiGet(char mess[]){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
     //http.begin("http://51.158.163.165/api/devices");
-    strcpy(wifiUrl,"http://192.168.0.99:3000/?message=");
-    strcat(wifiUrl,mess);
-    delay(10);
+    String wifiUrl = "http://192.168.0.99:3000/?message=";
+    wifiUrl = wifiUrl + mess;
+    //delay(100);
+    Serial.println(wifiUrl);
+    http.begin(wifiUrl);
+    int httpCode = http.GET();
+    http.end();
+  }
+}
+void WiFiGet(String mess){
+  if ((WiFi.status() == WL_CONNECTED))
+  {
+    HTTPClient http;
+    //http.begin("http://51.158.163.165/api/devices");
+    String wifiUrl = "http://192.168.0.99:3000/?message=";
+    wifiUrl = wifiUrl + mess;
+    //delay(100);
     Serial.println(wifiUrl);
     http.begin(wifiUrl);
     int httpCode = http.GET();
@@ -231,17 +256,27 @@ void WiFiGet(char mess[]){
 
 float turningParameter = 0.0;
 
+float leftBorder = 2.0;
+float leftStandardDistance = 10.0;
+float rightBorder = 20.0;
+float frontBorder = 5.0;
+float frontStandardDistance = 10.0;
+
+
 void loop() {
   // put your main code here, to run repeatedly:
   //double* distances = HCSR04.measureDistanceCm();
 
   float left = getDistance(distanceEcho1,distanceTrig1);
   float front = getDistance(distanceEcho2,distanceTrig2);
+  float right = getDistance(distanceEcho3,distanceTrig3);
   
   //Serial.print("left ");
   //Serial.println(left);
   //Serial.print("front ");
   //Serial.println(front);
+  //Serial.print("right ");
+  //Serial.println(right);
 
   //Serial.println(getTempMess());
 
@@ -249,50 +284,58 @@ void loop() {
 
   //getGasSensorData();
 
-  char distanceMess[] = "";
-  sprintf(distanceMess, "left:%f,front:%f", left, front);
-  WiFiGet(distanceMess);
-  //WiFiGet(getTempMess());
-  //WiFiGet(getPressureMess());
+  //char distanceMess[] = "left: %f , front: %f , right: %f ";
+  //sprintf(distanceMess, "left:%5.2f,front:%5.2f,right:%5.2f", left, front, right);
+  
+  //WiFiGet(distanceMess);
+  //WiFiGet(tempMess);
+  //String pressMess = getPressureMess();
+  //WiFiGet(pressureMess);
 
   //Forward(512);
   //delay(3000);
   //Stop();
 
-  if(front > 20.0){
+  if(front > frontStandardDistance){
     //skręt w prawo
-    if(left < 10.0){
-      float diff = 10.0 - left;
-      if(diff > 5){
+    if(left < leftStandardDistance){
+      float diff = leftStandardDistance - left;
+      if(diff > leftStandardDistance - leftBorder){
         turningParameter = 0.5;
       }
       else{
-        turningParameter = 0.5 * (5.0 - diff)/5.0;
+        turningParameter = 0.5 * (leftStandardDistance - left)/(leftStandardDistance - leftBorder);
       }
     }
-    else if(left > 10.0){
-      float diff = left - 10.0;
-      if(diff > 10){
+    else if(left > leftStandardDistance){
+      float diff = left - leftStandardDistance;
+      if(left > rightBorder){
         turningParameter = -0.5;
       }
       else{
-        turningParameter = -0.5 * (10.0 - diff)/10.0;
+        turningParameter = -0.5 * (rightBorder - leftStandardDistance + (diff - leftStandardDistance))/(rightBorder - leftStandardDistance);
       }
     }
   }
   else{
-    float diff =  20.0 - front;
-      if(diff > 10.0){
-        turningParameter = 0.5;
+    float diff =  frontStandardDistance - front;
+      if(front < frontBorder){
+        turningParameter = -1.0;
       }
       else{
-        turningParameter = 0.5 * (5.0 - diff)/5.0;
+        turningParameter = 0.5 * (front - frontBorder)/(frontStandardDistance - frontBorder);
       }
   }
   char turningParameterMess[] = "";
   //sprintf(turningParameterMess, "turningParameter: %f", turningParameter);
   //WiFiGet(turningParameterMess);
-  ForwardWithTurning(1024,turningParameter);
+  if(turningParameter == -1.0){
+    Backward(1024);
+  }
+  else{
+    ForwardWithTurning(1024,turningParameter);
+  }
   
-  //delay(1000);
+  
+  //delay(10);
 }
