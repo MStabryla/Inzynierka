@@ -497,7 +497,7 @@ int fis_gOMFCount[] = { 5, 2 };
 // Coefficients for the Input Member Functions
 FIS_TYPE fis_gMFI0Coeff1[] = { 5, 0, 2.5, 5 };
 FIS_TYPE fis_gMFI0Coeff2[] = { 3, 10 };
-FIS_TYPE fis_gMFI0Coeff3[] = { 3, 20, 20, 20 };
+FIS_TYPE fis_gMFI0Coeff3[] = { 5, 20, 20, 20 };
 FIS_TYPE* fis_gMFI0Coeff[] = { fis_gMFI0Coeff1, fis_gMFI0Coeff2, fis_gMFI0Coeff3 };
 FIS_TYPE fis_gMFI1Coeff1[] = { 5, 0, 5, 15 };
 FIS_TYPE fis_gMFI1Coeff2[] = { 7.5, 30 };
