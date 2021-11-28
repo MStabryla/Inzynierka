@@ -8,6 +8,7 @@
 #include <MQUnifiedsensor.h>
 #include <WiFi.h>
 #include "HTTPClient.h"
+#include <Fuzzy.h>
 
 #define DHTTYPE DHT11
 
@@ -45,6 +46,21 @@ MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
 char* ssid = "MAXX_LAN"; //"Atlantis";
 char* password = "debina23"; //"zaq1@WSX";
+
+Fuzzy *fuzzy = new Fuzzy();
+
+void setFuzzy(){
+  
+  FuzzyInput *left = new FuzzyInput(1);
+  FuzzySet *near = new FuzzySet(0, 20, 20, 40);
+  distance->addFuzzySet(small);
+  FuzzySet *mnear = new FuzzySet(30, 50, 50, 70);
+  distance->addFuzzySet(safe);
+  FuzzySet *far = new FuzzySet(60, 80, 80, 80);
+  distance->addFuzzySet(big);
+  fuzzy->addFuzzyInput(distance);
+  
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -315,7 +331,7 @@ void loop() {
   //delay(3000);
   //Stop();
     
-  writeRecord(lastRecordsFront,5,front);
+  /*writeRecord(lastRecordsFront,5,front);
   writeRecord(lastRecordsLeft,5,left);
   front = medium(lastRecordsFront,5);
   left = medium(lastRecordsLeft,5);
@@ -362,12 +378,15 @@ void loop() {
   }
   else{
     ForwardWithTurning(768,turningParameter);
-  }
-  Serial.print(front);
-  Serial.print(" ");
-  Serial.print(left);
-  Serial.print(" ");
-  Serial.println(turningParameter);
+  }*/
+
+
+  
+  //Serial.print(front);
+  //Serial.print(" ");
+  //Serial.print(left);
+  //Serial.print(" ");
+  //Serial.println(turningParameter);
   
   //delay(10);
 }
