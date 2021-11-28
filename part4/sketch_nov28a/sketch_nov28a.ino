@@ -60,18 +60,6 @@ const int fis_gcR = 10;
 FIS_TYPE g_fisInput[fis_gcI];
 FIS_TYPE g_fisOutput[fis_gcO];
 
-void setFuzzy(){
-  
-  FuzzyInput *left = new FuzzyInput(1);
-  FuzzySet *near = new FuzzySet(0, 20, 20, 40);
-  distance->addFuzzySet(small);
-  FuzzySet *mnear = new FuzzySet(30, 50, 50, 70);
-  distance->addFuzzySet(safe);
-  FuzzySet *far = new FuzzySet(60, 80, 80, 80);
-  distance->addFuzzySet(big);
-  fuzzy->addFuzzyInput(distance);
-  
-}
 
 void setup() {
   // put your setup code here, to run once:
@@ -198,6 +186,12 @@ void ForwardWithTurning(int baseSpeed,float turnParameter){
   analogWrite(IB1,baseSpeed *(0.5 + turnParameter), 100, 10, 0);
   analogWrite(IB2,0, 100, 10, 0);
 }
+void BackwardWithTurning(int baseSpeed,float turnParameter){
+  analogWrite(IA1,0, 100, 10, 0);
+  analogWrite(IA2,baseSpeed *(0.5 - turnParameter), 100, 10, 0);
+  analogWrite(IB1,0, 100, 10, 0);
+  analogWrite(IB2,baseSpeed *(0.5 + turnParameter), 100, 10, 0);
+}
 
 void Backward(int speed){
   analogWrite(IA1,0, 100, 10, 0);
@@ -300,6 +294,7 @@ void writeRecord(float* arr, int count, float value){
 
 float turningParameter = 0.0;
 
+const float DCspeed = 2048.0;
 float leftBorder = 2.0;
 float leftStandardDistance = 10.0;
 float rightBorder = 20.0;
@@ -407,7 +402,18 @@ void loop() {
     ForwardWithTurning(768,turningParameter);
   }*/
 
+  
+  FuzzyEval(left,front,right);
+  if(g_fisOutput[1] < 0){
+    BackwardWithTurning(DCspeed * -g_fisOutput[1],g_fisOutput[0]);
+  }
+  else{
+    ForwardWithTurning(DCspeed * g_fisOutput[1],g_fisOutput[0]);
+  }
 
+  Serial.print(g_fisOutput[0]);
+  Serial.print(" ");
+  Serial.println(g_fisOutput[1]);
   
   //Serial.print(front);
   //Serial.print(" ");
