@@ -273,11 +273,11 @@ void writeRecord(float* arr, int count, float value){
 
 float turningParameter = 0.0;
 
-float leftBorder = 2.0;
-float leftStandardDistance = 10.0;
-float rightBorder = 20.0;
-float frontBorder = 5.0;
-float frontStandardDistance = 10.0;
+float leftBorder = 5.0;
+float leftStandardDistance = 20.0;
+float rightBorder = 40.0;
+float frontBorder = 15.0;
+float frontStandardDistance = 20.0;
 
 float lastRecordsFront[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 float lastRecordsLeft[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -344,8 +344,8 @@ void loop() {
   else{
     float diff =  frontStandardDistance - front;
       if(front < frontBorder){
-        back = true;
-        //turningParameter = -1.0;
+        //back = true;
+        turningParameter = 0.5;
       }
       else{
         turningParameter = 0.5 * (front - frontBorder)/(frontStandardDistance - frontBorder);
@@ -355,16 +355,17 @@ void loop() {
   //sprintf(turningParameterMess, "turningParameter: %f", turningParameter);
   //WiFiGet(turningParameterMess);
   
-  if(back){
-    Backward(768);
+  /*if(back){
+    Backward(1024);
     delay(1000);
     back = false;
   }
   else{
-    ForwardWithTurning(768,turningParameter);
-  }
-  Serial.print(front);
-  Serial.print(" ");
+    ForwardWithTurning(1024,turningParameter);
+  }*/
+  ForwardWithTurning(1024,turningParameter);
+  //Serial.print(front);
+  //Serial.print(" ");
   Serial.print(left);
   Serial.print(" ");
   Serial.println(turningParameter);

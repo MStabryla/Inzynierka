@@ -294,7 +294,7 @@ void writeRecord(float* arr, int count, float value){
 
 float turningParameter = 0.0;
 
-const float DCspeed = 2048.0;
+const float DCspeed = 1024.0;
 float leftBorder = 2.0;
 float leftStandardDistance = 10.0;
 float rightBorder = 20.0;
