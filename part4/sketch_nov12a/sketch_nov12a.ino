@@ -35,10 +35,10 @@ LPS ps;
 
 /************************Hardware Related Macros************************************/
 #define         Board                   ("Arduino UNO")
-#define         Pin                     (4)  //Analog input 4 of your arduino
+#define         Pin                     (5)  //Analog input 4 of your arduino
 /***********************Software Related Macros************************************/
 #define         Type                    ("MQ-9") //MQ9
-#define         Voltage_Resolution      (5)
+#define         Voltage_Resolution      (3.3)
 #define         ADC_Bit_Resolution      (10) // For arduino UNO/MEGA/NANO
 #define         RatioMQ9CleanAir        (9.6) //RS / R0 = 60 ppm 
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
@@ -64,7 +64,7 @@ void setup() {
   pinMode(distanceEcho2,INPUT);
   pinMode(distanceTrig3,OUTPUT);
   pinMode(distanceEcho3,INPUT);
-  pinMode(4,INPUT);
+  pinMode(Pin,INPUT);
 
   if(!ps.init())
   {
@@ -225,14 +225,15 @@ void Stop(){
   analogWrite(IB2,0, 100, 10, 0);
 }
 
-
+String wifiUrl = "http://192.168.0.99:3000/";
+String prodUrl = "http://93.180.174.50:180/api/devices/122/add-values-by-property-id";
 
 void WiFiGet(char mess[]){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
     //http.begin("http://51.158.163.165/api/devices");
-    String wifiUrl = "http://192.168.0.99:3000/?message=";
+    //String wifiUrl = "http://192.168.0.99:3000/?message=";
     wifiUrl = wifiUrl + mess;
     //delay(100);
     //Serial.println(wifiUrl);
@@ -246,13 +247,52 @@ void WiFiGet(String mess){
   {
     HTTPClient http;
     //http.begin("http://51.158.163.165/api/devices");
-    String wifiUrl = "http://192.168.0.99:3000/?message=";
+    //String wifiUrl = "http://192.168.0.99:3000/?message=";
     wifiUrl = wifiUrl + mess;
     //delay(100);
     //Serial.println(wifiUrl);
     http.begin(wifiUrl);
     int httpCode = http.GET();
     http.end();
+  }
+}
+char POSTObject[64];
+void WiFiPost(String property,float val){
+  if ((WiFi.status() == WL_CONNECTED))
+  {
+    HTTPClient http;
+    //http.begin("http://51.158.163.165/api/devices");
+    
+    sprintf(POSTObject, "{ \"propertyId\":\"%s\" , \"val\":\"%f\" }", property, val);
+    http.begin(wifiUrl);
+    http.addHeader("Content-Type","application/json");
+    int httpCode = http.POST(POSTObject);
+    http.end();
+    if( httpCode > 200){
+      String response = http.getString();
+      Serial.print(httpCode);
+      Serial.print(" ");
+      Serial.println(response);
+    }
+  }
+}
+void WiFiPostProd(String property,float val){
+  if ((WiFi.status() == WL_CONNECTED))
+  {
+    HTTPClient http;
+    //http.begin("http://51.158.163.165/api/devices");
+    
+    sprintf(POSTObject, "{ \"propertyId\":\"%s\" , \"val\":\"%f\" }", property, val);
+    http.begin(prodUrl);
+    http.addHeader("Content-Type","application/json");
+    int httpCode = http.POST(POSTObject);
+    http.end();
+    if( httpCode > 0){
+      String response = http.getString();
+      Serial.print(httpCode);
+      Serial.print(" ");
+      Serial.println(response);
+    }
   }
 }
 
@@ -283,24 +323,12 @@ float lastRecordsFront[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 float lastRecordsLeft[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  //double* distances = HCSR04.measureDistanceCm();
-
   float left = getDistance(distanceEcho1,distanceTrig1);
   float front = getDistance(distanceEcho2,distanceTrig2);
   float right = getDistance(distanceEcho3,distanceTrig3);
-  
-  //Serial.print("left ");
-  //Serial.println(left);
-  //Serial.print("front ");
-  //Serial.println(front);
-  //Serial.print("right ");
-  //Serial.println(right);
 
   //Serial.println(getTempMess());
-
   //Serial.println(getPressureMess());
-
   //getGasSensorData();
 
   //char distanceMess[] = "left: %f , front: %f , right: %f ";
@@ -310,6 +338,10 @@ void loop() {
   //WiFiGet(tempMess);
   //String pressMess = getPressureMess();
   //WiFiGet(pressureMess);
+  WiFiPost("temp",dht.readTemperature());
+  WiFiPostProd("128",dht.readTemperature());
+  WiFiPost("humid",dht.readHumidity());
+  WiFiPost("press",ps.readPressureMillibars());
 
   //Forward(512);
   //delay(3000);
@@ -366,9 +398,9 @@ void loop() {
   ForwardWithTurning(1024,turningParameter);
   //Serial.print(front);
   //Serial.print(" ");
-  Serial.print(left);
-  Serial.print(" ");
-  Serial.println(turningParameter);
+  //Serial.print(left);
+  //Serial.print(" ");
+  //Serial.println(turningParameter);
   
   //delay(10);
 }
