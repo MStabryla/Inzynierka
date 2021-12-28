@@ -43,8 +43,8 @@ LPS ps;
 #define         RatioMQ9CleanAir        (9.6) //RS / R0 = 60 ppm 
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
-char* ssid = "Atlantis";
-char* password = "zaq1@WSX";
+char* ssid = "MAXX_LAN"; //"Atlantis";
+char* password = "debina23"; //"zaq1@WSX";
 
 void setup() {
   // put your setup code here, to run once:
@@ -57,7 +57,6 @@ void setup() {
   Serial.begin(115200);
   Wire.begin(SDA0_Pin, SCL0_Pin);
   
-  //HCSR04.begin(distanceTrig, distanceEcho);
   pinMode(distanceTrig1,OUTPUT);
   pinMode(distanceEcho1,INPUT);
   pinMode(distanceTrig2,OUTPUT);
@@ -86,18 +85,7 @@ void setup() {
   MQ9.setR0(calcR0/10);
   
   WiFi.begin(ssid, password);
-
-  //while (WiFi.status() != WL_CONNECTED) {
-    //Serial.println("Connecting to Atlantis");
-  //}
-  
-  //Serial.println("Connected to the Atlantis");
   IPAddress ip = WiFi.localIP();
-  //Serial.print("IP Address: ");
-  //Serial.println(ip);
-
-  Serial.println("turningParameter");
-
   digitalWrite(IA1,LOW);
 }
 
@@ -116,25 +104,17 @@ char* getDistanceMess(int distanceEcho, int distanceTrig){
   resultIn = pulseIn(distanceEcho, HIGH);
   resultIn /= 58;
   sprintf(mess, "dist: %d cm", resultIn);
-  //sprintf(mess, "dist: %d cm", distances[0]);
-
   return mess;
 }
 float getDistance(int distanceEcho, int distanceTrig){
-  //double* distances = HCSR04.measureDistanceCm();
-
   digitalWrite(distanceTrig, LOW);
   delayMicroseconds(5);
   digitalWrite(distanceTrig, HIGH);
   delayMicroseconds(15);
   digitalWrite(distanceTrig, LOW);
-
   float resultIn = 0;
   resultIn = pulseIn(distanceEcho, HIGH);
   resultIn /= 58;
-  //sprintf(mess, "dist: %d cm", resultIn);
-  //sprintf(mess, "dist: %d cm", distances[0]);
-
   return resultIn;
 }
 
@@ -143,9 +123,7 @@ char tempMess[64];
 char* getTempMess(){
   float h = dht.readHumidity();
   float t = dht.readTemperature();
-
   sprintf(tempMess, "Humidity: %f , °C %f", h,t);
-
   return tempMess;
 }
 
@@ -154,17 +132,15 @@ char* getPressureMess(){
   float pressure = ps.readPressureMillibars();
   float altitude = ps.pressureToAltitudeMeters(pressure);
   float temperature = ps.readTemperatureC();
-
   sprintf(pressureMess, "p:%f,inhPa\ta:%fm\t%fC", pressure, altitude, temperature);
-
   return pressureMess;
 }
 
-void getGasSensorData(){
+float getGasSensorData(float a, float b){
   MQ9.update(); // Update data, the arduino will be read the voltage on the analog pin
-  MQ9.setA(599.65); MQ9.setB(-2.244);
-  MQ9.readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
-  MQ9.serialDebug(); // Will print the table on the serial port
+  MQ9.setA(a);MQ9.setB(b); //MQ9.setA(599.65); MQ9.setB(-2.244);
+  return MQ9.readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
+  //MQ9.serialDebug(); // Will print the table on the serial port
 }
 
 void Forward(int speed){
@@ -246,11 +222,7 @@ void WiFiGet(char mess[]){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
-    //http.begin("http://51.158.163.165/api/devices");
-    //String wifiUrl = "http://192.168.0.99:3000/?message=";
     wifiUrl = wifiUrl + mess;
-    //delay(100);
-    //Serial.println(wifiUrl);
     http.begin(wifiUrl);
     int httpCode = http.GET();
     http.end();
@@ -260,11 +232,7 @@ void WiFiGet(String mess){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
-    //http.begin("http://51.158.163.165/api/devices");
-    //String wifiUrl = "http://192.168.0.99:3000/?message=";
     wifiUrl = wifiUrl + mess;
-    //delay(100);
-    //Serial.println(wifiUrl);
     http.begin(wifiUrl);
     int httpCode = http.GET();
     http.end();
@@ -275,7 +243,6 @@ void WiFiPost(String property,float val){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
-    //http.begin("http://51.158.163.165/api/devices");
     
     sprintf(POSTObject, "{ \"propertyId\":\"%s\" , \"val\":\"%f\" }", property, val);
     http.begin(wifiUrl);
@@ -283,10 +250,6 @@ void WiFiPost(String property,float val){
     int httpCode = http.POST(POSTObject);
     http.end();
     if( httpCode > 200){
-      //String response = http.getString();
-      //Serial.print(httpCode);
-      //Serial.print(" ");
-      //Serial.println(response);
     }
   }
 }
@@ -294,7 +257,6 @@ void WiFiPostProd(String property,float val){
   if ((WiFi.status() == WL_CONNECTED))
   {
     HTTPClient http;
-    //http.begin("http://51.158.163.165/api/devices");
     
     sprintf(POSTObject, "{ \"propertyId\":\"%s\" , \"val\":\"%f\" }", property, val);
     http.begin(prodUrl);
@@ -302,10 +264,7 @@ void WiFiPostProd(String property,float val){
     int httpCode = http.POST(POSTObject);
     http.end();
     if( httpCode > 0){
-      //String response = http.getString();
-      //Serial.print(httpCode);
-      //Serial.print(" ");
-      //Serial.println(response);
+
     }
   }
 }
@@ -342,11 +301,15 @@ void loop() {
   float front = getDistance(distanceEcho2,distanceTrig2);
   float right = getDistance(distanceEcho3,distanceTrig3);
 
-  //WiFiPostProd("128",dht.readTemperature());
-  //WiFiPostProd("129",dht.readHumidity());
-  //WiFiPostProd("130",ps.readPressureMillibars());
-  getGasSensorData();
-    
+  WiFiPostProd("128",dht.readTemperature());
+  WiFiPostProd("129",dht.readHumidity());
+  WiFiPostProd("130",ps.readPressureMillibars());
+  
+  float co = getGasSensorData(599.65,-2.244);
+  float lpg = getGasSensorData(1000.5,-2.186);
+  float ch4 = getGasSensorData(4269.6,-2.648);
+  Serial.print(co); Serial.print(" | "); Serial.print(lpg); Serial.print(" | "); Serial.println(ch4);
+
   writeRecord(lastRecordsFront,5,front);
   writeRecord(lastRecordsLeft,5,left);
   front = medium(lastRecordsFront,5);
@@ -386,21 +349,11 @@ void loop() {
         turningParameter = 0.5 * (frontStandardDistance - front)/(frontStandardDistance - frontBorder);
       }
   }
-  char turningParameterMess[] = "";
-  //sprintf(turningParameterMess, "turningParameter: %f", turningParameter);
-  //WiFiGet(turningParameterMess);
-  
   if(back){
     BackwardWithTurning(1024,turningParameter);
     delay(1000);
     back = false;
   }
   ForwardWithTurning(1024,turningParameter);
-  //Serial.print(left);
-  //Serial.print(" ");
-  //Serial.print(front);
-  //Serial.print(" ");
-  //Serial.println(turningParameter * 10);
-  
-  //delay(10);
+
 }
