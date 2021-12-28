@@ -34,11 +34,11 @@ DHT dht(tempInput, DHTTYPE);
 LPS ps;
 
 /************************Hardware Related Macros************************************/
-#define         Board                   ("Arduino UNO")
-#define         Pin                     (5)  //Analog input 4 of your arduino
+#define         Board                   ("ESP32")
+#define         Pin                     (34)  //Analog input 4 of your arduino
 /***********************Software Related Macros************************************/
 #define         Type                    ("MQ-9") //MQ9
-#define         Voltage_Resolution      (3.3)
+#define         Voltage_Resolution      (5)
 #define         ADC_Bit_Resolution      (10) // For arduino UNO/MEGA/NANO
 #define         RatioMQ9CleanAir        (9.6) //RS / R0 = 60 ppm 
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
@@ -75,8 +75,16 @@ void setup() {
 
 
   MQ9.setRegressionMethod(1); //_PPM =  a*ratio^b
-  MQ9.setA(1000.5); MQ9.setB(-2.186); // Configurate the ecuation values to get LPG concentration
   MQ9.init(); 
+  
+  float calcR0 = 0;
+  for(int i = 1; i<=10; i ++)
+  {
+    MQ9.update(); // Update data, the arduino will be read the voltage on the analog pin
+    calcR0 += MQ9.calibrate(RatioMQ9CleanAir);
+    Serial.print(".");
+  }
+  MQ9.setR0(calcR0/10);
   
   WiFi.begin(ssid, password);
 
@@ -155,6 +163,7 @@ char* getPressureMess(){
 
 void getGasSensorData(){
   MQ9.update(); // Update data, the arduino will be read the voltage on the analog pin
+  MQ9.setA(599.65); MQ9.setB(-2.244);
   MQ9.readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
   MQ9.serialDebug(); // Will print the table on the serial port
 }
@@ -337,6 +346,7 @@ void loop() {
   //WiFiPostProd("128",dht.readTemperature());
   //WiFiPostProd("129",dht.readHumidity());
   //WiFiPostProd("130",ps.readPressureMillibars());
+  getGasSensorData();
     
   writeRecord(lastRecordsFront,5,front);
   writeRecord(lastRecordsLeft,5,left);
@@ -387,11 +397,11 @@ void loop() {
     back = false;
   }
   ForwardWithTurning(1024,turningParameter);
-  Serial.print(left);
-  Serial.print(" ");
-  Serial.print(front);
-  Serial.print(" ");
-  Serial.println(turningParameter * 10);
+  //Serial.print(left);
+  //Serial.print(" ");
+  //Serial.print(front);
+  //Serial.print(" ");
+  //Serial.println(turningParameter * 10);
   
   //delay(10);
 }
