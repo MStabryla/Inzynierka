@@ -171,12 +171,6 @@ void ForwardWithTurning(int baseSpeed,float turnParameter){
   analogWrite(IB1,baseSpeed *(0.5 + turnParameter), 100, 10, 0);
   analogWrite(IB2,0, 100, 10, 0);
 }
-void BackwardWithTurning(int baseSpeed,float turnParameter){
-  analogWrite(IA1,0, 100, 10, 0);
-  analogWrite(IA2,baseSpeed *(0.5 + turnParameter), 100, 10, 0);
-  analogWrite(IB1,0, 100, 10, 0);
-  analogWrite(IB2,baseSpeed *(0.5 - turnParameter), 100, 10, 0);
-}
 
 void Backward(int speed){
   analogWrite(IA1,0, 100, 10, 0);
@@ -275,10 +269,10 @@ void WiFiPost(String property,float val){
     int httpCode = http.POST(POSTObject);
     http.end();
     if( httpCode > 200){
-      //String response = http.getString();
-      //Serial.print(httpCode);
-      //Serial.print(" ");
-      //Serial.println(response);
+      String response = http.getString();
+      Serial.print(httpCode);
+      Serial.print(" ");
+      Serial.println(response);
     }
   }
 }
@@ -294,10 +288,10 @@ void WiFiPostProd(String property,float val){
     int httpCode = http.POST(POSTObject);
     http.end();
     if( httpCode > 0){
-      //String response = http.getString();
-      //Serial.print(httpCode);
-      //Serial.print(" ");
-      //Serial.println(response);
+      String response = http.getString();
+      Serial.print(httpCode);
+      Serial.print(" ");
+      Serial.println(response);
     }
   }
 }
@@ -322,76 +316,21 @@ float turningParameter = 0.0;
 float leftBorder = 5.0;
 float leftStandardDistance = 20.0;
 float rightBorder = 40.0;
-float frontMax = 10.0;
-float frontBorder = 20.0;
-float frontStandardDistance = 30.0;
+float frontBorder = 15.0;
+float frontStandardDistance = 20.0;
 
 float lastRecordsFront[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 float lastRecordsLeft[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 
 void loop() {
+  
   float left = getDistance(distanceEcho1,distanceTrig1);
   float front = getDistance(distanceEcho2,distanceTrig2);
   float right = getDistance(distanceEcho3,distanceTrig3);
 
-  //WiFiPostProd("128",dht.readTemperature());
-  //WiFiPostProd("129",dht.readHumidity());
-  //WiFiPostProd("130",ps.readPressureMillibars());
-    
-  writeRecord(lastRecordsFront,5,front);
-  writeRecord(lastRecordsLeft,5,left);
-  front = medium(lastRecordsFront,5);
-  left = medium(lastRecordsLeft,5);
-  bool back = false;
-  if(front > frontStandardDistance){
-    //skręt w prawo
-    if(left < leftStandardDistance){
-      float diff = leftStandardDistance - left;
-      if(diff > leftStandardDistance - leftBorder){
-        turningParameter = 0.5;
-      }
-      else{
-        turningParameter = 0.5 * (leftStandardDistance - left)/(leftStandardDistance - leftBorder);
-      }
-    }
-    else if(left > leftStandardDistance){
-      float diff = left - leftStandardDistance;
-      if(left > rightBorder){
-        turningParameter = -0.5;
-      }
-      else{
-        turningParameter = -0.5 * (rightBorder - leftStandardDistance + (diff - leftStandardDistance))/(rightBorder - leftStandardDistance);
-      }
-    }
-  }
-  else{
-    float diff =  frontStandardDistance - front;
-      if(front < frontMax){
-        back = true;
-      }
-      else if(front < frontBorder){
-        //back = true;
-        turningParameter = 0.5;
-      }
-      else{
-        turningParameter = 0.5 * (frontStandardDistance - front)/(frontStandardDistance - frontBorder);
-      }
-  }
-  char turningParameterMess[] = "";
-  //sprintf(turningParameterMess, "turningParameter: %f", turningParameter);
-  //WiFiGet(turningParameterMess);
+  WiFiPostProd("128",dht.readTemperature());
+  WiFiPostProd("129",dht.readHumidity());
+  WiFiPostProd("130",ps.readPressureMillibars());
   
-  if(back){
-    BackwardWithTurning(1024,turningParameter);
-    delay(1000);
-    back = false;
-  }
-  ForwardWithTurning(1024,turningParameter);
-  Serial.print(left);
-  Serial.print(" ");
-  Serial.print(front);
-  Serial.print(" ");
-  Serial.println(turningParameter * 10);
-  
-  //delay(10);
+  delay(1000);
 }
