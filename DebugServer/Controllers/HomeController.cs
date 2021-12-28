@@ -24,5 +24,11 @@ namespace DebugServer.Controllers
             Console.WriteLine(message);
             return Ok();
         }
+        [HttpPost("")]
+        public IActionResult Data(Data data)
+        {
+            Console.WriteLine(data.propertyId + " = " + data.val);
+            return Ok();
+        }
     }
 }
