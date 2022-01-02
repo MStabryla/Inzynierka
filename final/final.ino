@@ -1,13 +1,14 @@
 //#include <HCSR04.h>
 #include "Arduino.h"
 #include "analogWrite.h"
-#include <string.h>
+#include "string.h"
 #include "DHT.h"
 #include <Wire.h>
 #include <LPS.h>
 #include <MQUnifiedsensor.h>
 #include <WiFi.h>
 #include "HTTPClient.h"
+#include "BluetoothSerial.h"
 
 #define DHTTYPE DHT11
 
@@ -45,6 +46,9 @@ MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
 char* ssid = "MAXX_LAN"; //"Atlantis";
 char* password = "debina23"; //"zaq1@WSX";
+
+//Połączenie bloetooth do sterowania ręcznego
+BluetoothSerial SerialBT;
 
 void setup() {
   // put your setup code here, to run once:
@@ -85,7 +89,7 @@ void setup() {
   MQ9.setR0(calcR0/10);
   
   WiFi.begin(ssid, password);
-  IPAddress ip = WiFi.localIP();
+  SerialBT.begin("MateuszStabrylaPI");
   digitalWrite(IA1,LOW);
 }
 
@@ -304,17 +308,24 @@ void loop() {
   WiFiPostProd("128",dht.readTemperature());
   WiFiPostProd("129",dht.readHumidity());
   WiFiPostProd("130",ps.readPressureMillibars());
-  
+  //Serial.print("Temperature: ");Serial.print(dht.readTemperature());Serial.println("°C ");
+  //Serial.print("Humidity: ");Serial.print(dht.readHumidity());Serial.println(" % ");
+  //Serial.print("Pressure: ");Serial.print(ps.readPressureMillibars());Serial.println(" HPa ");
   float co = getGasSensorData(599.65,-2.244);
+  //MQ9.serialDebug();
   float lpg = getGasSensorData(1000.5,-2.186);
+  //MQ9.serialDebug();
   float ch4 = getGasSensorData(4269.6,-2.648);
-  Serial.print(co); Serial.print(" | "); Serial.print(lpg); Serial.print(" | "); Serial.println(ch4);
+  //MQ9.serialDebug();
+  //Serial.println("Gases dencity: ");
+  //Serial.print("CO: ");Serial.print(co); Serial.print(" ppm | LPG "); Serial.print(lpg); Serial.print(" ppm | CH4: "); Serial.print(ch4);Serial.println(" ppm");
 
   writeRecord(lastRecordsFront,5,front);
   writeRecord(lastRecordsLeft,5,left);
   front = medium(lastRecordsFront,5);
   left = medium(lastRecordsLeft,5);
   bool back = false;
+  String bluetoothCommand = "";
   if(front > frontStandardDistance){
     //skręt w prawo
     if(left < leftStandardDistance){
@@ -349,7 +360,26 @@ void loop() {
         turningParameter = 0.5 * (frontStandardDistance - front)/(frontStandardDistance - frontBorder);
       }
   }
-  if(back){
+  if(SerialBT.available()){
+    bluetoothCommand = SerialBT.readString();
+    if(strcmp(bluetoothCommand.c_str(), "forward") == 0){
+      Forward(1024);
+      delay(1000);
+    }
+    else if(strcmp(bluetoothCommand.c_str(), "backward") == 0){
+      Backward(1024);
+      delay(1000);
+    }
+    else if(strcmp(bluetoothCommand.c_str(), "turn-left") == 0){
+      TurnLeft(1024);
+      delay(1000);
+    }
+    else if(strcmp(bluetoothCommand.c_str(), "turn-right") == 0){
+      TurnRight(1024);
+      delay(1000);
+    }
+  }
+  else if(back){
     BackwardWithTurning(1024,turningParameter);
     delay(1000);
     back = false;
