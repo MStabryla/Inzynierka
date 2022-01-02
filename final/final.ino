@@ -33,6 +33,7 @@ DHT dht(tempInput, DHTTYPE);
 
 LPS ps;
 
+//Dane początkowe dla mikrokontrolera ESP-32
 /************************Hardware Related Macros************************************/
 #define         Board                   ("ESP-32")
 #define         Pin                     (34)  //Analog input 4 of your arduino
@@ -55,6 +56,7 @@ void setup() {
   analogWrite(IB2,0, 100, 10, 0);
   
   Serial.begin(115200);
+  //ustaweinie pinów do komunikacji za pomocą interfejsu I2C
   Wire.begin(SDA0_Pin, SCL0_Pin);
   
   pinMode(distanceTrig1,OUTPUT);
@@ -106,14 +108,18 @@ char* getDistanceMess(int distanceEcho, int distanceTrig){
   sprintf(mess, "dist: %d cm", resultIn);
   return mess;
 }
+// distanceEcho oraz distanceTrig to numery pinów przypisane do danego czujnika
 float getDistance(int distanceEcho, int distanceTrig){
+  // aktywowanie czujnika ultradźwiękowego
   digitalWrite(distanceTrig, LOW);
   delayMicroseconds(5);
   digitalWrite(distanceTrig, HIGH);
   delayMicroseconds(15);
   digitalWrite(distanceTrig, LOW);
   float resultIn = 0;
+  //pobranie czasu, przez jaki utrzymuje sie stan wysoki
   resultIn = pulseIn(distanceEcho, HIGH);
+  // podzielenie przez 58 da wartość w cm
   resultIn /= 58;
   return resultIn;
 }
@@ -130,17 +136,16 @@ char* getTempMess(){
 char pressureMess[64];
 char* getPressureMess(){
   float pressure = ps.readPressureMillibars();
+  // czujnik pozwala też na ustalenie wysokości w metrach n.p.m.
   float altitude = ps.pressureToAltitudeMeters(pressure);
-  float temperature = ps.readTemperatureC();
-  sprintf(pressureMess, "p:%f,inhPa\ta:%fm\t%fC", pressure, altitude, temperature);
+  sprintf(pressureMess, "p:%f,inhPa\ta:%fm\t", pressure, altitude);
   return pressureMess;
 }
 
 float getGasSensorData(float a, float b){
   MQ9.update(); // Update data, the arduino will be read the voltage on the analog pin
-  MQ9.setA(a);MQ9.setB(b); //MQ9.setA(599.65); MQ9.setB(-2.244);
+  MQ9.setA(a);MQ9.setB(b);
   return MQ9.readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
-  //MQ9.serialDebug(); // Will print the table on the serial port
 }
 
 void Forward(int speed){
@@ -149,12 +154,14 @@ void Forward(int speed){
   analogWrite(IB1,speed, 100, 10, 0);
   analogWrite(IB2,0, 100, 10, 0);
 }
+//Jazda do przodu z ustalonym skrętem  na podstawiem turnParameter
 void ForwardWithTurning(int baseSpeed,float turnParameter){
   analogWrite(IA1,baseSpeed *(0.5 - turnParameter), 100, 10, 0);
   analogWrite(IA2,0, 100, 10, 0);
   analogWrite(IB1,baseSpeed *(0.5 + turnParameter), 100, 10, 0);
   analogWrite(IB2,0, 100, 10, 0);
 }
+//Jazda do tyłu z ustalonym skrętem na podstawiem turnParameter
 void BackwardWithTurning(int baseSpeed,float turnParameter){
   analogWrite(IA1,0, 100, 10, 0);
   analogWrite(IA2,baseSpeed *(0.5 + turnParameter), 100, 10, 0);
@@ -242,14 +249,17 @@ char POSTObject[64];
 void WiFiPost(String property,float val){
   if ((WiFi.status() == WL_CONNECTED))
   {
+    //Utworzenie struktury http
     HTTPClient http;
-    
+    //zapisanie danych w postaci JSON, przy pomocy metod obsługi ciągu znaków
     sprintf(POSTObject, "{ \"propertyId\":\"%s\" , \"val\":\"%f\" }", property, val);
     http.begin(wifiUrl);
+    //oznaczenie, zę dane są w postaci JSON
     http.addHeader("Content-Type","application/json");
     int httpCode = http.POST(POSTObject);
     http.end();
     if( httpCode > 200){
+      //wykonanie w przypadku poprawnej odpowiedzi, dla potrzeb tego robota nie było potrzeby upewniania się, czy dane zapisały się poprawnie
     }
   }
 }
@@ -268,7 +278,7 @@ void WiFiPostProd(String property,float val){
     }
   }
 }
-
+//wyznaczanie średniej z zakresu
 float medium(float* arr, int count){
   float sum = 0.0;
   for(int i=0;i< count;i++){
@@ -276,7 +286,7 @@ float medium(float* arr, int count){
   }
   return sum / count;
 }
-
+//dodawanie nowej informacji do tablicy
 void writeRecord(float* arr, int count, float value){
   for(int i=0;i< count-1;i++){
     arr[i] = arr[i+1];
@@ -286,6 +296,7 @@ void writeRecord(float* arr, int count, float value){
 
 float turningParameter = 0.0;
 
+//zdefiniowane granice zachowań w algorytmie wall-following
 float leftBorder = 5.0;
 float leftStandardDistance = 20.0;
 float rightBorder = 40.0;
@@ -293,6 +304,7 @@ float frontMax = 10.0;
 float frontBorder = 20.0;
 float frontStandardDistance = 30.0;
 
+//zapis ostatnio zmierzonych odległości 
 float lastRecordsFront[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 float lastRecordsLeft[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 
@@ -305,15 +317,16 @@ void loop() {
   WiFiPostProd("129",dht.readHumidity());
   WiFiPostProd("130",ps.readPressureMillibars());
   
-  float co = getGasSensorData(599.65,-2.244);
-  float lpg = getGasSensorData(1000.5,-2.186);
-  float ch4 = getGasSensorData(4269.6,-2.648);
+  float co = getGasSensorData(599.65,-2.244); // tlenek węgla
+  float lpg = getGasSensorData(1000.5,-2.186); // gaz petrochemiczny, butan
+  float ch4 = getGasSensorData(4269.6,-2.648); // Metan
   Serial.print(co); Serial.print(" | "); Serial.print(lpg); Serial.print(" | "); Serial.println(ch4);
 
   writeRecord(lastRecordsFront,5,front);
   writeRecord(lastRecordsLeft,5,left);
   front = medium(lastRecordsFront,5);
   left = medium(lastRecordsLeft,5);
+  //wall-following
   bool back = false;
   if(front > frontStandardDistance){
     //skręt w prawo
@@ -326,6 +339,7 @@ void loop() {
         turningParameter = 0.5 * (leftStandardDistance - left)/(leftStandardDistance - leftBorder);
       }
     }
+    //skręt w lewo
     else if(left > leftStandardDistance){
       float diff = left - leftStandardDistance;
       if(left > rightBorder){
@@ -336,19 +350,20 @@ void loop() {
       }
     }
   }
+  //cofanie się z zachowaniem skrętu
   else{
     float diff =  frontStandardDistance - front;
       if(front < frontMax){
         back = true;
       }
       else if(front < frontBorder){
-        //back = true;
         turningParameter = 0.5;
       }
       else{
         turningParameter = 0.5 * (frontStandardDistance - front)/(frontStandardDistance - frontBorder);
       }
   }
+  //cofanie musi trwać przynajmniej sekundę, by robot wydostał się z zaklinowanego miejsca
   if(back){
     BackwardWithTurning(1024,turningParameter);
     delay(1000);
