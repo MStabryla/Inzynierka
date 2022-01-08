@@ -45,8 +45,8 @@ LPS ps;
 #define         RatioMQ9CleanAir        (9.6) //RS / R0 = 60 ppm 
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
-char* ssid = "MAXX_LAN"; //"Atlantis";
-char* password = "debina23"; //"zaq1@WSX";
+char* ssid = "Atlantis";
+char* password = "zaq1@WSX";
 
 //Połączenie bloetooth do sterowania ręcznego
 BluetoothSerial SerialBT;
@@ -189,14 +189,14 @@ void TurnLeft(int speed){
 void TurnRight(int speed){
   analogWrite(IA1,0, 100, 10, 0);
   analogWrite(IA2,0, 100, 10, 0);
-  analogWrite(IB1,0, 100, 10, 0);
-  analogWrite(IB2,speed, 100, 10, 0);
+  analogWrite(IB1,speed, 100, 10, 0);
+  analogWrite(IB2,0, 100, 10, 0);
 }
 void TurnLeftBackward(int speed){
   analogWrite(IA1,0, 100, 10, 0);
-  analogWrite(IA2,speed, 100, 10, 0);
+  analogWrite(IA2,0, 100, 10, 0);
   analogWrite(IB1,0, 100, 10, 0);
-  analogWrite(IB2,0, 100, 10, 0);
+  analogWrite(IB2,speed, 100, 10, 0);
 }
 
 void TurnRightBackward(int speed){
@@ -251,9 +251,7 @@ void WiFiGet(String mess){
 }
 char POSTObject[64];
 void WiFiPost(String property,float val){
-  if ((WiFi.status() == WL_CONNECTED))
-  {
-    //Utworzenie struktury http
+  //Utworzenie struktury http
     HTTPClient http;
     //zapisanie danych w postaci JSON, przy pomocy metod obsługi ciągu znaków
     sprintf(POSTObject, "{ \"propertyId\":\"%s\" , \"val\":\"%f\" }", property, val);
@@ -265,7 +263,7 @@ void WiFiPost(String property,float val){
     if( httpCode > 200){
       //wykonanie w przypadku poprawnej odpowiedzi, dla potrzeb tego robota nie było potrzeby upewniania się, czy dane zapisały się poprawnie
     }
-  }
+  
 }
 void WiFiPostProd(String property,float val){
   if ((WiFi.status() == WL_CONNECTED))
@@ -312,18 +310,33 @@ float frontStandardDistance = 30.0;
 float lastRecordsFront[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 float lastRecordsLeft[] = {0.0, 0.0, 0.0, 0.0, 0.0 };
 
+bool WiFiconnected = false;
+bool autonomicMovement = false;
+
+int speed = 192;
+
 void loop() {
   float left = getDistance(distanceEcho1,distanceTrig1);
   float front = getDistance(distanceEcho2,distanceTrig2);
   float right = getDistance(distanceEcho3,distanceTrig3);
+  SerialBT.print(left);
+  SerialBT.print(" ");
+  SerialBT.print(front);
+  SerialBT.print(" ");
+  SerialBT.println(autonomicMovement);
 
-  WiFiPostProd("128",dht.readTemperature());
-  WiFiPostProd("129",dht.readHumidity());
-  WiFiPostProd("130",ps.readPressureMillibars());
+  /*if (WiFiconnected || (WiFi.status() == WL_CONNECTED))
+  {
+    WiFiPostProd("128",dht.readTemperature());
+    WiFiPostProd("129",dht.readHumidity());
+    WiFiPostProd("130",ps.readPressureMillibars());
+    WiFiconnected = true;
+  }*/
   
   float co = getGasSensorData(599.65,-2.244); // tlenek węgla
   float lpg = getGasSensorData(1000.5,-2.186); // gaz petrochemiczny, butan
   float ch4 = getGasSensorData(4269.6,-2.648); // Metan
+  Serial.print(dht.readTemperature());Serial.print(" | "); Serial.print(dht.readHumidity()); Serial.print(" | "); Serial.print(ps.readPressureMillibars()); Serial.print(" | ");
   Serial.print(co); Serial.print(" | "); Serial.print(lpg); Serial.print(" | "); Serial.println(ch4);
 
   writeRecord(lastRecordsFront,5,front);
@@ -370,28 +383,46 @@ void loop() {
   }
   if(SerialBT.available()){
     bluetoothCommand = SerialBT.readString();
+    int isNumber = bluetoothCommand.toInt();
+    Serial.print("isNumber = ");
+    Serial.println(isNumber);
     if(strcmp(bluetoothCommand.c_str(), "forward") == 0){
-      Forward(1024);
+      Forward(speed);
       delay(1000);
     }
     else if(strcmp(bluetoothCommand.c_str(), "backward") == 0){
-      Backward(1024);
+      Backward(speed);
       delay(1000);
     }
     else if(strcmp(bluetoothCommand.c_str(), "turn-left") == 0){
-      TurnLeft(1024);
+      TurnLeft(speed);
       delay(1000);
     }
     else if(strcmp(bluetoothCommand.c_str(), "turn-right") == 0){
-      TurnRight(1024);
+      TurnRight(speed);
       delay(1000);
     }
+    else if(strcmp(bluetoothCommand.c_str(), "start") == 0){
+      autonomicMovement = true;
+    }
+    else if(strcmp(bluetoothCommand.c_str(), "stop") == 0){
+      Stop();
+      autonomicMovement = false;
+    }
+    else if(isNumber > 0){
+      speed = isNumber;
+      Serial.print("speed = ");
+      Serial.println(speed);
+    }
   }
-  else if(back){
-    BackwardWithTurning(1024,turningParameter);
+  else if(back && autonomicMovement){
+    BackwardWithTurning(speed,turningParameter);
     delay(1000);
     back = false;
   }
-  ForwardWithTurning(1024,turningParameter);
+  else if(autonomicMovement)
+    ForwardWithTurning(speed,turningParameter);
+  else
+    Stop();
 
 }
